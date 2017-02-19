@@ -7,4 +7,4 @@ nbody_2.py runs 1min36s per loop
 
 nbody_3.py runs 1min37s per loop
 
-nbody_4.py runs 1min4s per loop
+nbody_4.py runs 1min4s per loop (The current version runs faster)
