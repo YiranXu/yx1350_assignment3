@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[85]:
+# In[1]:
 
 """
     N-body simulation.
@@ -10,7 +10,7 @@ from itertools import combinations
 
 def paris(BODIES_key):
     pairs=combinations(BODIES_key,2) 
-    return pairs
+    return list(pairs)
     
     
 def advance(dt,iterations,BODIES_key,BODIES,BODIES_pairs):
@@ -22,7 +22,7 @@ def advance(dt,iterations,BODIES_key,BODIES,BODIES_pairs):
    
         for (body1,body2) in BODIES_pairs: 
         
-            if (body1 != body2) and not (body2 in seenit):
+            if body2 not in seenit:
                 ([x1, y1, z1], v1, m1) = BODIES[body1]
                 ([x2, y2, z2], v2, m2) = BODIES[body2]
                 (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
@@ -57,7 +57,7 @@ def report_energy(BODIES_key,BODIES,BODIES_pairs,e=0.0,):
     for (body1,body2) in BODIES_pairs: 
        
         
-        if (body1 != body2) and not (body2 in seenit):
+        if body2 not in seenit:
             ((x1, y1, z1), v1, m1) = BODIES[body1]
             ((x2, y2, z2), v2, m2) = BODIES[body2]
             (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
@@ -146,15 +146,14 @@ if __name__ == '__main__':
 
     BODIES_key=['sun','jupiter','saturn','uranus','neptune']
     BODIES_pairs=paris(BODIES_key)
-    #nbody(100, 'sun', 20000) 
-    nbody(10, 'sun', 20) 
+    get_ipython().magic("timeit -n3 nbody(100, 'sun', 20000)")
+    
     
 
 
-# In[72]:
+# In[ ]:
 
 get_ipython().magic("timeit -n3 nbody(10, 'sun', 20)")
-paris(BODIES_key)
 
 
 # In[ ]:
