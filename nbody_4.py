@@ -1,13 +1,14 @@
 
 # coding: utf-8
 
-# In[48]:
+# In[10]:
 
 #Using data aggregation to reduce loop overheads
 #This change made the second most improvement.
 """
     N-body simulation.
 """
+import itertools 
 
 PI = 3.14159265358979323
 SOLAR_MASS = 4 * PI * PI
@@ -77,16 +78,11 @@ def advance(dt):
     '''
     seenit = []
     BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
-    #for body1 in BODIES.keys():
-    #modify to 
-    #for body1 in BODIES_key:
+    BODIES_pairs = list(itertools.combinations(BODIES.keys(), 2))
+   
     for (body1,body2) in BODIES_pairs: 
-        #for body2 in BODIES_key:
-            if (body1 != body2) and not (body2 in seenit):
+       
+            if  body2 not in seenit:
                 ([x1, y1, z1], v1, m1) = BODIES[body1]
                 ([x2, y2, z2], v2, m2) = BODIES[body2]
                 (dx, dy, dz) = compute_deltas(x1, x2, y1, y2, z1, z2)
@@ -106,30 +102,20 @@ def report_energy(e=0.0):
     '''
     seenit = []
     BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
-    #for body1 in BODIES.keys():
+    BODIES_pairs = list(itertools.combinations(BODIES.keys(), 2))
     
-    #for body1 in BODIES.keys():
-    #modify to 
-    #for body1 in BODIES_key:
     for (body1,body2) in BODIES_pairs:  
-        #for body2 in BODIES.keys():
-        #modify to
-        #for body2 in BODIES_key:
-            if (body1 != body2) and not (body2 in seenit):
+        
+            if  body2 not in seenit:
                 ((x1, y1, z1), v1, m1) = BODIES[body1]
-                #print("body1 is {0}".format(body1))
+               
                 ((x2, y2, z2), v2, m2) = BODIES[body2]
-                #print("body2 is {0}".format(body2))
+               
                 (dx, dy, dz) = compute_deltas(x1, x2, y1, y2, z1, z2)
                 e -= compute_energy(m1, m2, dx, dy, dz)
                 seenit.append(body1)
         
-    #for body in BODIES.keys():
-    #modify to
+    
     for body in BODIES_key:
         (r, [vx, vy, vz], m) = BODIES[body]
         e += m * (vx * vx + vy * vy + vz * vz) / 2.
@@ -142,8 +128,7 @@ def offset_momentum(ref, px=0.0, py=0.0, pz=0.0):
         offset values from this reference
     '''
     BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    #modify to 
-    #for body in BODIES.keys():
+    
     for body in BODIES_key:
         (r, [vx, vy, vz], m) = BODIES[body]
         px -= vx * m
@@ -163,7 +148,7 @@ def nbody(loops, reference, iterations):
         reference - body at center of system
         iterations - number of timesteps to advance
     '''
-    # Set up global state
+    
     offset_momentum(BODIES[reference])
 
     for _ in range(loops):
