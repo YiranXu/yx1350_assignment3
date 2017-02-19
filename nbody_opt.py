@@ -1,26 +1,24 @@
 
 # coding: utf-8
 
-# In[45]:
+# In[85]:
 
 """
     N-body simulation.
 """
+from itertools import combinations
 
+def paris(BODIES_key):
+    pairs=combinations(BODIES_key,2) 
+    return pairs
     
-
-def advance(dt,iterations,BODIES_key,BODIES):
+    
+def advance(dt,iterations,BODIES_key,BODIES,BODIES_pairs):
     '''
         advance the system one timestep
     '''
     for _ in range(iterations):
         seenit = set()
-    
-        BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
-        BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
    
         for (body1,body2) in BODIES_pairs: 
         
@@ -49,17 +47,12 @@ def advance(dt,iterations,BODIES_key,BODIES):
             r[2] += dt * vz
 
     
-def report_energy(BODIES_key,BODIES,e=0.0,):
+def report_energy(BODIES_key,BODIES,BODIES_pairs,e=0.0,):
     '''
         compute the energy and return it so that it can be printed
     '''
     
     seenit = set()
-    
-    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
 
     for (body1,body2) in BODIES_pairs: 
        
@@ -104,6 +97,14 @@ def nbody(loops, reference, iterations):
         reference - body at center of system
         iterations - number of timesteps to advance
     '''
+    
+    offset_momentum(BODIES[reference],BODIES_key,BODIES)
+    for _ in range(loops):
+        report_energy(BODIES_key,BODIES,BODIES_pairs)
+        advance(0.01,iterations,BODIES_key,BODIES,BODIES_pairs)
+        print("report energy",report_energy(BODIES_key,BODIES,BODIES_pairs))
+
+if __name__ == '__main__':
     PI = 3.14159265358979323
     SOLAR_MASS = 4 * PI * PI
     DAYS_PER_YEAR = 365.24
@@ -143,24 +144,17 @@ def nbody(loops, reference, iterations):
                  -9.51592254519715870e-05 * DAYS_PER_YEAR],
                 5.15138902046611451e-05 * SOLAR_MASS)}
 
-    BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    # Set up global state
-    offset_momentum(BODIES[reference],BODIES_key,BODIES)
+    BODIES_key=['sun','jupiter','saturn','uranus','neptune']
+    BODIES_pairs=paris(BODIES_key)
+    #nbody(100, 'sun', 20000) 
+    nbody(10, 'sun', 20) 
     
-    for _ in range(loops):
-        advance(0.01,iterations,BODIES_key,BODIES)
-        print("report energy",report_energy(BODIES_key,BODIES))
-
-if __name__ == '__main__':
-    
-    nbody(100, 'sun', 20000) 
-    
-   
 
 
-# In[ ]:
+# In[72]:
 
 get_ipython().magic("timeit -n3 nbody(10, 'sun', 20)")
+paris(BODIES_key)
 
 
 # In[ ]:
