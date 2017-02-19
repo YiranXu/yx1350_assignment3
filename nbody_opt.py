@@ -1,17 +1,114 @@
-#Relative speedup (R) is 4.31. I made it to run only 24.8 second.
+
 # coding: utf-8
 
-# In[17]:
+# In[45]:
 
 """
     N-body simulation.
 """
 
-PI = 3.14159265358979323
-SOLAR_MASS = 4 * PI * PI
-DAYS_PER_YEAR = 365.24
+    
 
-BODIES = {
+def advance(dt,iterations,BODIES_key,BODIES):
+    '''
+        advance the system one timestep
+    '''
+    for _ in range(iterations):
+        seenit = set()
+    
+        BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
+                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
+                 ('saturn','uranus'),('saturn','neptune'),
+                 ('uranus','neptune')}
+        BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
+   
+        for (body1,body2) in BODIES_pairs: 
+        
+            if (body1 != body2) and not (body2 in seenit):
+                ([x1, y1, z1], v1, m1) = BODIES[body1]
+                ([x2, y2, z2], v2, m2) = BODIES[body2]
+                (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
+                
+                core_compute_b = (dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5)))
+                compute_b_m2=m2 * core_compute_b
+                compute_b_m1=m1 * core_compute_b
+                v1[0] -= dx * compute_b_m2
+                v1[1] -= dy * compute_b_m2
+                v1[2] -= dz * compute_b_m2
+                v2[0] += dx * compute_b_m1
+                v2[1] += dy * compute_b_m1
+                v2[2] += dz * compute_b_m1
+                seenit.add(body1)
+        
+   
+        for body in BODIES_key:
+            (r, [vx, vy, vz], m) = BODIES[body]
+       
+            r[0] += dt * vx
+            r[1] += dt * vy
+            r[2] += dt * vz
+
+    
+def report_energy(BODIES_key,BODIES,e=0.0,):
+    '''
+        compute the energy and return it so that it can be printed
+    '''
+    
+    seenit = set()
+    
+    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
+                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
+                 ('saturn','uranus'),('saturn','neptune'),
+                 ('uranus','neptune')}
+
+    for (body1,body2) in BODIES_pairs: 
+       
+        
+        if (body1 != body2) and not (body2 in seenit):
+            ((x1, y1, z1), v1, m1) = BODIES[body1]
+            ((x2, y2, z2), v2, m2) = BODIES[body2]
+            (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
+            e -= (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5) #compute_energy(m1, m2, dx, dy, dz)
+               
+            seenit.add(body1)
+        
+    #for body in BODIES.keys():
+    for body in BODIES_key:
+        (r, [vx, vy, vz], m) = BODIES[body]
+        e += m * (vx * vx + vy * vy + vz * vz) / 2.
+        
+    return e
+
+def offset_momentum(ref, BODIES_key,BODIES,px=0.0, py=0.0, pz=0.0):
+    '''
+        ref is the body in the center of the system
+        offset values from this reference
+    '''
+    
+    for body in BODIES_key:
+        (r, [vx, vy, vz], m) = BODIES[body]
+        px -= vx * m
+        py -= vy * m
+        pz -= vz * m
+        
+    (r, v, m) = ref
+    v[0] = px / m
+    v[1] = py / m
+    v[2] = pz / m
+
+
+def nbody(loops, reference, iterations):
+    '''
+        nbody simulation
+        loops - number of loops to run
+        reference - body at center of system
+        iterations - number of timesteps to advance
+    '''
+    PI = 3.14159265358979323
+    SOLAR_MASS = 4 * PI * PI
+    DAYS_PER_YEAR = 365.24
+
+    BODIES = {
     'sun': ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], SOLAR_MASS),
 
     'jupiter': ([4.84143144246472090e+00,
@@ -46,149 +143,24 @@ BODIES = {
                  -9.51592254519715870e-05 * DAYS_PER_YEAR],
                 5.15138902046611451e-05 * SOLAR_MASS)}
 
-def compute_deltas(x1, x2, y1, y2, z1, z2):
-    return (x1-x2, y1-y2, z1-z2)
-    
-def compute_b(m, dt, dx, dy, dz):
-    #mag = dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-    return m * (dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5)))
-
-#def compute_mag(dt, dx, dy, dz):
-    #return dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-
-def update_vs(v1, v2, dt, dx, dy, dz, m1, m2):
-    v1[0] -= dx * compute_b(m2, dt, dx, dy, dz)
-    v1[1] -= dy * compute_b(m2, dt, dx, dy, dz)
-    v1[2] -= dz * compute_b(m2, dt, dx, dy, dz)
-    v2[0] += dx * compute_b(m1, dt, dx, dy, dz)
-    v2[1] += dy * compute_b(m1, dt, dx, dy, dz)
-    v2[2] += dz * compute_b(m1, dt, dx, dy, dz)
-
-#def update_rs(r, dt, vx, vy, vz):
-    #r[0] += dt * vx
-    #r[1] += dt * vy
-    #r[2] += dt * vz
-
-def advance(dt):
-    '''
-        advance the system one timestep
-    '''
-    #seenit = []
-    seenit = set()
-    
-    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
     BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    #for body1 in BODIES.keys():
-    for (body1,body2) in BODIES_pairs: 
-        #for body2 in BODIES.keys():
-        if (body1 != body2) and not (body2 in seenit):
-            ([x1, y1, z1], v1, m1) = BODIES[body1]
-            ([x2, y2, z2], v2, m2) = BODIES[body2]
-            (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
-                
-                #seenit.append(body1)
-                #update_vs(v1, v2, dt, dx, dy, dz, m1, m2)
-            compute_b_m2=compute_b(m2, dt, dx, dy, dz)
-            compute_b_m1=compute_b(m1, dt, dx, dy, dz)
-            v1[0] -= dx * compute_b_m2
-            v1[1] -= dy * compute_b_m2
-            v1[2] -= dz * compute_b_m2
-            v2[0] += dx * compute_b_m1
-            v2[1] += dy * compute_b_m1
-            v2[2] += dz * compute_b_m1
-            seenit.add(body1)
-        
-    #for body in BODIES.keys():
-    for body in BODIES_key:
-        (r, [vx, vy, vz], m) = BODIES[body]
-        #update_rs(r, dt, vx, vy, vz)
-        r[0] += dt * vx
-        r[1] += dt * vy
-        r[2] += dt * vz
-
-#def compute_energy(m1, m2, dx, dy, dz):
-    #return (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5)
-    
-def report_energy(e=0.0):
-    '''
-        compute the energy and return it so that it can be printed
-    '''
-    #seenit = []
-    seenit = set()
-    
-    BODIES_pairs={('sun','jupiter'),('sun','saturn'),('sun','uranus'),('sun','neptune'),
-                 ('jupiter','saturn'),('jupiter','uranus'),('jupiter','neptune'),
-                 ('saturn','uranus'),('saturn','neptune'),
-                 ('uranus','neptune')}
-    BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    
-    #for body1 in BODIES.keys():
-    for (body1,body2) in BODIES_pairs: 
-        # for body2 in BODIES.keys():
-        
-        if (body1 != body2) and not (body2 in seenit):
-            ((x1, y1, z1), v1, m1) = BODIES[body1]
-            ((x2, y2, z2), v2, m2) = BODIES[body2]
-            (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) #compute_delta
-            e -= (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5) #compute_energy(m1, m2, dx, dy, dz)
-                #seenit.append(body1)
-            seenit.add(body1)
-        
-    #for body in BODIES.keys():
-    for body in BODIES_key:
-        (r, [vx, vy, vz], m) = BODIES[body]
-        e += m * (vx * vx + vy * vy + vz * vz) / 2.
-        
-    return e
-
-def offset_momentum(ref, px=0.0, py=0.0, pz=0.0):
-    '''
-        ref is the body in the center of the system
-        offset values from this reference
-    '''
-    BODIES_key={'sun','jupiter','saturn','uranus','neptune'}
-    
-    #for body in BODIES.keys():
-    for body in BODIES_key:
-        (r, [vx, vy, vz], m) = BODIES[body]
-        px -= vx * m
-        py -= vy * m
-        pz -= vz * m
-        
-    (r, v, m) = ref
-    v[0] = px / m
-    v[1] = py / m
-    v[2] = pz / m
-
-
-def nbody(loops, reference, iterations):
-    '''
-        nbody simulation
-        loops - number of loops to run
-        reference - body at center of system
-        iterations - number of timesteps to advance
-    '''
     # Set up global state
-    offset_momentum(BODIES[reference])
-
+    offset_momentum(BODIES[reference],BODIES_key,BODIES)
+    
     for _ in range(loops):
-        report_energy()
-        for _ in range(iterations):
-            advance(0.01)
-        print(report_energy())
+        advance(0.01,iterations,BODIES_key,BODIES)
+        print("report energy",report_energy(BODIES_key,BODIES))
 
 if __name__ == '__main__':
+    
     nbody(100, 'sun', 20000) 
-    #time: 2 loops, best of 3: 24.8 s per loop
+    
    
 
 
-# In[18]:
+# In[ ]:
 
-get_ipython().magic("timeit -n2 nbody(100, 'sun', 20000)")
+get_ipython().magic("timeit -n3 nbody(10, 'sun', 20)")
 
 
 # In[ ]:
