@@ -146,17 +146,14 @@ if __name__ == '__main__':
 
     BODIES_key=['sun','jupiter','saturn','uranus','neptune']
     BODIES_pairs=paris(BODIES_key)
-    get_ipython().magic("timeit -n3 nbody(100, 'sun', 20000)")
+    nbody(100, 'sun', 20000)
     
     
 
 
-# In[ ]:
-
-get_ipython().magic("timeit -n3 nbody(10, 'sun', 20)")
 
 
-# In[ ]:
+
 
 
 
