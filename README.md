@@ -1,4 +1,6 @@
 # yx1350_assignment3
+For assignment4: 
+People who review my code: Xinsheng Zhang(xz1757) and Danny O Vilela(dov205) 
 Original runs 1min47s per loop
 
 nbody_1.py runs 52.8s per loop
