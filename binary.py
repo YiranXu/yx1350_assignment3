@@ -14,5 +14,5 @@ def zbits(n, k):
         item_list.append(''.join(item))
     #select unique permutation of length n that contain k zero bits
     results=np.unique(item_list)
-    #conver the results to a set so that the order within results would not matter
+    #convert the results to a set so that the order within results would not matter
     return set(results) 
