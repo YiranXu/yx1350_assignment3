@@ -8,6 +8,11 @@
 """
 from itertools import combinations
 
+def paris(BODIES_key):
+    pairs=combinations(BODIES_key,2) 
+    return list(pairs)
+    
+    
 def advance(dt,iterations,BODIES_key,BODIES,BODIES_pairs):
     '''
         advance the system one timestep
@@ -140,7 +145,7 @@ if __name__ == '__main__':
                 5.15138902046611451e-05 * SOLAR_MASS)}
 
     BODIES_key=['sun','jupiter','saturn','uranus','neptune']
-    BODIES_pairs=list(combinations(BODIES_key,2))
+    BODIES_pairs=paris(BODIES_key)
     nbody(100, 'sun', 20000)
     
     
