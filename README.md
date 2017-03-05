@@ -1,4 +1,8 @@
-# yx1350_assignment3
+# yx1350_assignment3-6
+calculator.py is for assignment6
+
+nbody_iter.py is for assignment5
+
 For assignment4: 
 
 People who review my code: Xinsheng Zhang(xz1757) and Danny O Vilela(dov205) 
