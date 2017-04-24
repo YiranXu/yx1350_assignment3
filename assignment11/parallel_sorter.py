@@ -40,7 +40,6 @@ def sort_all(data):
 if __name__=="__main__":
 	data=None
 	if rank==0:
-		#input=input("Please enter an integer as length of data: \n")
 		
 		#randomly generate 10,000 unsorted data set
 		data=np.random.randint(0,100000,10000)
