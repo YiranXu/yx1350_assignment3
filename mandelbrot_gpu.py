@@ -50,10 +50,10 @@ def compute_mandel(min_x, max_x, min_y, max_y, image, iters):
     end_y=start_y+each_y
     #fill this block from starting position to ending position
     for x in range(start_x,end_x):
-        if x<=width:
+        if x<width:
             real = min_x + x * pixel_size_x
             for y in range(start_y,end_y):
-                if y<=height:
+                if y<height:
                     imag = min_y + y * pixel_size_y
                     image[y, x] = mandel(real, imag, iters)
                 else:
@@ -62,8 +62,8 @@ def compute_mandel(min_x, max_x, min_y, max_y, image, iters):
             break
 if __name__ == '__main__':
 	image = np.zeros((1024, 1536), dtype = np.uint8)
-	blockdim = (8, 8)
-	griddim = (32, 8)
+	blockdim = (32, 8)
+	griddim = (32, 16)
 	#allocate memory for result
 	image_global_mem = cuda.to_device(image)
 	compute_mandel[griddim, blockdim](-2.0, 1.0, -1.0, 1.0, image_global_mem, 20) 
